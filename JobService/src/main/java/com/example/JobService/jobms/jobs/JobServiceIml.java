@@ -6,10 +6,15 @@ import com.example.JobService.jobms.clients.ReviewClient;
 import com.example.JobService.jobms.external.Company;
 import com.example.JobService.jobms.external.Review;
 import com.example.JobService.jobms.jobs.mapper.JobMapper;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -25,13 +30,23 @@ public class JobServiceIml implements JobService {
     private CompanyClient companyClient;
     @Autowired
     private ReviewClient reviewClient;
+    int attempt = 0;
 
     @Override
+//    @CircuitBreaker(name="companyBreaker",fallbackMethod = "companyBreakerFallback")
+//    @Retry(name="companyBreaker",fallbackMethod = "companyBreakerFallback")
+    @RateLimiter(name="companyBreaker",fallbackMethod = "companyBreakerFallback")
     public List<JobDTO> findAll() {
+        System.out.println("Attemp: "+ ++attempt);
         List<Job> jobs = jobRepo.findAll();
-
         return jobs.stream().map(this::convertToDTO).collect(Collectors.toList());
 
+    }
+    public List<String>companyBreakerFallback(Exception e)
+    {
+        List<String>list = new ArrayList<>();
+        list.add("Dummy");
+        return list;
     }
 
     @Override

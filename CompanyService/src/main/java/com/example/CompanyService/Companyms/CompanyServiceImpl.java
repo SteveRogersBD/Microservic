@@ -1,5 +1,7 @@
 package com.example.CompanyService.Companyms;
 
+import com.example.CompanyService.Companyms.clients.ReviewClient;
+import com.example.CompanyService.Companyms.dto.ReviewMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +13,9 @@ public class CompanyServiceImpl implements CompanyService {
 
     @Autowired
     private CompanyRepo companyRepo;
+    @Autowired
+    private ReviewClient reviewClient;
+
     @Override
     public List<Company> getAllCompanies() {
         return companyRepo.findAll();
@@ -49,6 +54,19 @@ public class CompanyServiceImpl implements CompanyService {
     @Override
     public Company getCompanyById(Long id) {
         return companyRepo.findById(id).get();
+    }
+
+    @Override
+    public void updateCompanyRating(ReviewMessage reviewMessage) {
+        System.out.println(reviewMessage.getDescription());
+        Company company = companyRepo.findById(reviewMessage.getCompanyId())
+                .orElseThrow(() -> new RuntimeException("Company not found"));
+
+        Double averageRating = reviewClient.getAverageRatingOfCompany(
+                reviewMessage.getId());
+        company.setRating(averageRating);
+        companyRepo.save(company);
+
     }
 
 

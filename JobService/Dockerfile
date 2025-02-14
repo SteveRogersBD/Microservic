@@ -5,11 +5,10 @@ FROM openjdk:17-jdk-slim
 WORKDIR /app
 
 # 3. Copy the built JAR file from the target directory to the container
-COPY target/*.jar servicereg.jar
+COPY target/*.jar jobms.jar
 
 # 4. Expose the application port
-EXPOSE 8761
+EXPOSE 8082
 
 # 5. Command to run the application
-CMD ["java", "-jar", "servicereg.jar"]
-
+CMD ["java", "-jar", "jobms.jar"]
